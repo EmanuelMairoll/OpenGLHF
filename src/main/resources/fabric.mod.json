@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "openglhf",
+  "version": "${version}",
+  "name": "OpenGLHF",
+  "description": "Toy OpenGL Project for our Computer Graphics Class",
+  "authors": [
+    "Emanuel Mairoll",
+    "Noah Beshiri",
+    "Amelie Zähringer"
+  ],
+  "contact": {
+    "website": "https://example.com",
+    "repo": "https://github.com/emanuel/OpenGLHF"
+  },
+  "license": "MIT",
+  "icon": "assets/OpenGLHF/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.cgh.openglhf.openglhf.client.OpenGLHFClient"
+    ]
+  },
+  "mixins": [
+    "OpenGLHF.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.17",
+    "fabric": "*",
+    "minecraft": "1.19.4"
+  }
+}
