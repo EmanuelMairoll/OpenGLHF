@@ -3,20 +3,31 @@ package com.cgh.openglhf.openglhf.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import org.lwjgl.opengl.GL32;
+import net.minecraft.client.MinecraftClient;
+import static org.lwjgl.opengl.GL33.*;
 
 public class OpenGLHFClient implements ClientModInitializer {
+    private TriangleRenderer triangleRenderer;
 
     @Override
     public void onInitializeClient() {
-        WorldRenderEvents.BEFORE_ENTITIES.register(this::renderBeforeEntities);
+        MinecraftClient.getInstance().execute(() -> {
+            try {
+                triangleRenderer = new TriangleRenderer();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        WorldRenderEvents.AFTER_ENTITIES.register(this::renderAfterEntities);
     }
 
-    private void renderBeforeEntities(WorldRenderContext worldRenderContext) {
-        GL32.glPushMatrix();
+    private void renderAfterEntities(WorldRenderContext worldRenderContext) {
+        //System.out.println("renderAfterEntities");
 
-        // render stuff here
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        GL32.glPopMatrix();
+        triangleRenderer.render();
     }
 }
