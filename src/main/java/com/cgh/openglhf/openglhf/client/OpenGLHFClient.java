@@ -6,22 +6,22 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 
 public class OpenGLHFClient implements ClientModInitializer {
-    private TriangleRenderer triangleRenderer;
+    private EntityPosRenderer entityPosRenderer;
 
     @Override
     public void onInitializeClient() {
         MinecraftClient.getInstance().execute(() -> {
             try {
-                triangleRenderer = new TriangleRenderer();
+                entityPosRenderer = new EntityPosRenderer();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
 
-        WorldRenderEvents.AFTER_ENTITIES.register(this::renderAfterEntities);
+        WorldRenderEvents.BEFORE_ENTITIES.register(this::renderAfterEntities);
     }
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
-        triangleRenderer.render(worldRenderContext);
+        entityPosRenderer.render(worldRenderContext);
     }
 }
