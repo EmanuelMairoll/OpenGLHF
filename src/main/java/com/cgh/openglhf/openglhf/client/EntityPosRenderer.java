@@ -29,8 +29,9 @@ public class EntityPosRenderer {
         GL33.glEnableVertexAttribArray(0);
 
         shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/esp.vert"));
-        shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/esp.frag"));
+        shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.vert"));
+        shaderProgram.createGeometryShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.geom"));
+        shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.frag"));
         shaderProgram.link();
     }
 
