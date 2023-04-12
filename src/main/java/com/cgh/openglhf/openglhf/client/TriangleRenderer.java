@@ -1,5 +1,6 @@
 package com.cgh.openglhf.openglhf.client;
 
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryUtil;
 
@@ -39,7 +40,20 @@ public class TriangleRenderer {
         shaderProgram.link();
     }
 
-    public void render() {
+    public void render(WorldRenderContext worldRenderContext) {
+        worldRenderContext.camera();
+
+        shaderProgram.bind();
+
+        var pos = worldRenderContext.camera().getPos();
+        var matrices = worldRenderContext.matrixStack();
+        matrices.push();
+        matrices.translate(-pos.x, -pos.y, -pos.z);
+        shaderProgram.setModelViewMat(matrices.peek().getPositionMatrix());
+        matrices.pop();
+
+        shaderProgram.setProjectionMat(worldRenderContext.projectionMatrix());
+
         shaderProgram.bind();
         GL33.glBindVertexArray(vao);
         GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);

@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
-import static org.lwjgl.opengl.GL33.*;
 
 public class OpenGLHFClient implements ClientModInitializer {
     private TriangleRenderer triangleRenderer;
@@ -23,11 +22,6 @@ public class OpenGLHFClient implements ClientModInitializer {
     }
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
-        //System.out.println("renderAfterEntities");
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        triangleRenderer.render();
+        triangleRenderer.render(worldRenderContext);
     }
 }

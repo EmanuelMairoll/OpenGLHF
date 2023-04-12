@@ -1,5 +1,12 @@
 package com.cgh.openglhf.openglhf.client;
 
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL20;
+
+import java.nio.FloatBuffer;
+
 import static org.lwjgl.opengl.GL33.*;
 
 public class ShaderProgram {
@@ -11,6 +18,10 @@ public class ShaderProgram {
     private int geometryShaderId;
 
     private int fragmentShaderId;
+
+    private GLUniform modelViewMat;
+
+    private GLUniform projectionMat;
 
     public ShaderProgram() {
         programId = glCreateProgram();
@@ -70,6 +81,8 @@ public class ShaderProgram {
             System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
         }
 
+        modelViewMat = GLUniform.createIfExists(programId, "ModelViewMat");
+        projectionMat = GLUniform.createIfExists(programId, "ProjMat");
     }
 
     public void bind() {
@@ -96,6 +109,45 @@ public class ShaderProgram {
         }
         if (programId != 0) {
             glDeleteProgram(programId);
+        }
+    }
+
+    public void setModelViewMat(Matrix4f modelViewMat) {
+        if (this.modelViewMat != null) {
+            this.modelViewMat.setUniformMatrix4fv(modelViewMat);
+        }
+    }
+
+    public void setProjectionMat(Matrix4f projectionMat) {
+        if (this.projectionMat != null) {
+            this.projectionMat.setUniformMatrix4fv(projectionMat);
+        }
+    }
+
+    public static class GLUniform {
+        private final int location;
+        private final int programId;
+
+        public static GLUniform createIfExists(int programId, String name) {
+            var uniform = new GLUniform(programId, name);
+            return uniform.location == -1 ? null : uniform;
+        }
+
+        private GLUniform(int programId, String name) {
+            this.programId = programId;
+            this.location = GL20.glGetUniformLocation(programId, name);
+        }
+
+        public void setUniformMatrix4fv(Matrix4f matrix) {
+            FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+            matrix.get(buffer);
+            setUniformMatrix4fv(buffer);
+        }
+
+        public void setUniformMatrix4fv(FloatBuffer matrix) {
+            GL20.glUseProgram(programId);
+            GL20.glUniformMatrix4fv(location, false, matrix);
+            GL20.glUseProgram(0);
         }
     }
 
