@@ -2,8 +2,11 @@ package com.cgh.openglhf.openglhf.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryUtil;
@@ -15,10 +18,11 @@ import java.util.stream.StreamSupport;
 public class EntityPosRenderer {
 
     private final int vao;
-    private int vbo;
+    private final int vbo;
     private final ShaderProgram shaderProgram;
 
     public EntityPosRenderer() throws Exception {
+
         vao = GL33.glGenVertexArrays();
         GL33.glBindVertexArray(vao);
 
@@ -27,6 +31,8 @@ public class EntityPosRenderer {
 
         GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
         GL33.glEnableVertexAttribArray(0);
+
+        unbindBuffers();
 
         shaderProgram = new ShaderProgram();
         shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.vert"));
@@ -58,17 +64,18 @@ public class EntityPosRenderer {
         GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertexBuffer, GL33.GL_STATIC_DRAW);
         MemoryUtil.memFree(vertexBuffer);
 
-        System.out.println(Arrays.toString(vertices));
 
         shaderProgram.bind();
         GL33.glPointSize(10);
         GL33.glDrawArrays(GL33.GL_POINTS, 0, vertices.length / 3);
         shaderProgram.unbind();
+
+        unbindBuffers();
     }
 
     private DoubleStream mapVertices(Entity entity, float tickDelta) {
         if (entity instanceof SheepEntity) {
-            return DoubleStream.of(
+           return DoubleStream.of(
                     MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX()),
                     MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY()),
                     MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ()));
@@ -77,11 +84,15 @@ public class EntityPosRenderer {
         }
     }
 
+    private void unbindBuffers() {
+        GL33.glBindVertexArray(0);
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
+    }
+
     public void cleanup() {
         GL33.glDisableVertexAttribArray(0);
-        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
+        unbindBuffers();
         GL33.glDeleteBuffers(vbo);
-        GL33.glBindVertexArray(0);
         GL33.glDeleteVertexArrays(vao);
         shaderProgram.cleanup();
     }

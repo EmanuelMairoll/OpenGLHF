@@ -66,15 +66,7 @@ public class ShaderProgram {
             throw new Exception("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
         }
 
-        if (vertexShaderId != 0) {
-            glDetachShader(programId, vertexShaderId);
-        }
-        if (geometryShaderId != 0) {
-            glDetachShader(programId, geometryShaderId);
-        }
-        if (fragmentShaderId != 0) {
-            glDetachShader(programId, fragmentShaderId);
-        }
+        deleteShaders();
 
         glValidateProgram(programId);
         if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
@@ -95,18 +87,7 @@ public class ShaderProgram {
 
     public void cleanup() {
         unbind();
-        if (vertexShaderId != 0) {
-            glDetachShader(programId, vertexShaderId);
-            glDeleteShader(vertexShaderId);
-        }
-        if (geometryShaderId != 0) {
-            glDetachShader(programId, geometryShaderId);
-            glDeleteShader(geometryShaderId);
-        }
-        if (fragmentShaderId != 0) {
-            glDetachShader(programId, fragmentShaderId);
-            glDeleteShader(fragmentShaderId);
-        }
+
         if (programId != 0) {
             glDeleteProgram(programId);
         }
@@ -121,6 +102,21 @@ public class ShaderProgram {
     public void setProjectionMat(Matrix4f projectionMat) {
         if (this.projectionMat != null) {
             this.projectionMat.setUniformMatrix4fv(projectionMat);
+        }
+    }
+
+    private void deleteShaders() {
+        if (vertexShaderId != 0) {
+            glDetachShader(programId, vertexShaderId);
+            glDeleteShader(vertexShaderId);
+        }
+        if (geometryShaderId != 0) {
+            glDetachShader(programId, geometryShaderId);
+            glDeleteShader(geometryShaderId);
+        }
+        if (fragmentShaderId != 0) {
+            glDetachShader(programId, fragmentShaderId);
+            glDeleteShader(fragmentShaderId);
         }
     }
 
