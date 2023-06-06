@@ -8,6 +8,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryUtil;
 
@@ -31,14 +32,10 @@ public class EntityBoxRenderer {
         GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
         GL33.glEnableVertexAttribArray(0);
 
-        GL33.glVertexAttribPointer(1, 3, GL33.GL_FLOAT, false, 0, 12);
-        GL33.glEnableVertexAttribArray(1);
-
         unbindBuffers();
 
         shaderProgram = new ShaderProgram();
         shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.vert"));
-        shaderProgram.createGeometryShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.geom"));
         shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.frag"));
         shaderProgram.link();
     }
@@ -60,7 +57,7 @@ public class EntityBoxRenderer {
 
         var vertices = StreamSupport.stream(entities.spliterator(), false)
                 .filter(e -> e instanceof SheepEntity)
-                .flatMapToDouble(e -> describeBoxAsFloats(e.getBoundingBox()))
+                .flatMapToDouble(e -> boxToLineVertices(e.getBoundingBox()))
                 .toArray();
 
         // override calculated vertices with
@@ -81,15 +78,17 @@ public class EntityBoxRenderer {
 
         MemoryUtil.memFree(vertexBufferData);
 
-       // GL33.glDisable(GL33.GL_CULL_FACE);
+        GL33.glDisable(GL33.GL_CULL_FACE);
+        GL33.glDisable(GL33.GL_DEPTH_TEST);
 
         shaderProgram.bind();
 
-        GL33.glDrawArrays(GL33.GL_POINTS, 0, vertices.length / 6);
+        GL33.glDrawArrays(GL33.GL_LINES, 0, vertices.length / 3);
 
         shaderProgram.unbind();
 
-       // GL33.glEnable(GL33.GL_CULL_FACE);
+        GL33.glEnable(GL33.GL_CULL_FACE);
+        GL33.glEnable(GL33.GL_DEPTH_TEST);
 
         unbindBuffers();
     }
@@ -119,6 +118,56 @@ public class EntityBoxRenderer {
         return DoubleStream.of(
                 box.maxX, box.maxY, box.maxZ,
                 box.minX, box.minY, box.minZ
+        );
+    }
+
+    private DoubleStream boxToLineVertices(Box box) {
+
+        // TODO lerp
+        double maxX = box.maxX;
+        double maxY = box.maxY;
+        double maxZ = box.maxZ;
+
+        double minX = box.minX;
+        double minY = box.minY;
+        double minZ = box.minZ;
+
+        return DoubleStream.of(
+                maxX, maxY, maxZ,
+                maxX, minY, maxZ,
+
+                maxX, minY, maxZ,
+                maxX, minY, minZ,
+
+                maxX, minY, minZ,
+                maxX, maxY, minZ,
+
+                maxX, maxY, minZ,
+                maxX, maxY, maxZ,
+
+                maxX, maxY, maxZ,
+                minX, maxY, maxZ,
+
+                minX, maxY, maxZ,
+                minX, maxY, minZ,
+
+                minX, maxY, minZ,
+                maxX, maxY, minZ,
+
+                minX, maxY, maxZ,
+                minX, minY, maxZ,
+
+                minX, minY, maxZ,
+                maxX, minY, maxZ,
+
+                minX, minY, maxZ,
+                minX, minY, minZ,
+
+                minX, minY, minZ,
+                maxX, minY, minZ,
+
+                minX, minY, minZ,
+                minX, maxY, minZ
         );
     }
 
