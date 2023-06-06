@@ -1,7 +1,10 @@
 package com.cgh.openglhf.openglhf.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.util.math.Box;
@@ -28,10 +31,14 @@ public class EntityBoxRenderer {
         GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
         GL33.glEnableVertexAttribArray(0);
 
+        GL33.glVertexAttribPointer(1, 3, GL33.GL_FLOAT, false, 0, 12);
+        GL33.glEnableVertexAttribArray(1);
+
         unbindBuffers();
 
         shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.vert"));
+        shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.vert"));
+        shaderProgram.createGeometryShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.geom"));
         shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.frag"));
         shaderProgram.link();
     }
@@ -50,29 +57,40 @@ public class EntityBoxRenderer {
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vbo);
 
         var entities = MinecraftClient.getInstance().world.getEntities();
-        
+
         var vertices = StreamSupport.stream(entities.spliterator(), false)
                 .filter(e -> e instanceof SheepEntity)
-                .flatMapToDouble(e -> calculateVerticesFromBox(e.getBoundingBox()))
+                .flatMapToDouble(e -> describeBoxAsFloats(e.getBoundingBox()))
                 .toArray();
 
         // override calculated vertices with
         // fixed, test NDC vertices
         // expectation: draw a rectangle in the players view
+        /*
         vertices = new double[] {
-                0, 0, 0,
-                -0.5, 0, 0,
-                -0.5, 0.5, 0
+                0.0, 0.0, 0.0,
+                -0.5, 0.0, 0.0,
+                -0.5, 0.5, 0.0
         };
+        */
 
         var vertexBufferData = MemoryUtil.memAllocFloat(vertices.length);
         vertexBufferData.put(doublesToFloat(vertices)).flip();
+
         GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertexBufferData, GL33.GL_STATIC_DRAW);
+
         MemoryUtil.memFree(vertexBufferData);
 
+       // GL33.glDisable(GL33.GL_CULL_FACE);
+
         shaderProgram.bind();
-        GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
+
+        GL33.glDrawArrays(GL33.GL_POINTS, 0, vertices.length / 6);
+
         shaderProgram.unbind();
+
+       // GL33.glEnable(GL33.GL_CULL_FACE);
+
         unbindBuffers();
     }
 
@@ -95,6 +113,13 @@ public class EntityBoxRenderer {
         for (int i = 0; i < array.length; i++)
             inFloatForm[i] = (float) array[i];
         return inFloatForm;
+    }
+
+    private DoubleStream describeBoxAsFloats(Box box) {
+        return DoubleStream.of(
+                box.maxX, box.maxY, box.maxZ,
+                box.minX, box.minY, box.minZ
+        );
     }
 
     private DoubleStream calculateVerticesFromBox(Box box) {
