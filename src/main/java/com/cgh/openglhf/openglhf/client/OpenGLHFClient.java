@@ -30,12 +30,16 @@ public class OpenGLHFClient implements ClientModInitializer {
             }
         });
 
-        WorldRenderEvents.BEFORE_ENTITIES.register(this::renderAfterEntities);
+        WorldRenderEvents.BEFORE_ENTITIES.register(this::renderBeforeEntities);
+        WorldRenderEvents.AFTER_ENTITIES.register(this::renderAfterEntities);
+
+    }
+
+    private void renderBeforeEntities(WorldRenderContext worldRenderContext) {
+        entityPosRenderer.render(worldRenderContext);
     }
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
-        entityPosRenderer.render(worldRenderContext);
-
         var entities = StreamSupport.stream(
                         MinecraftClient.getInstance().world.getEntities().spliterator(), false)
                 .filter(entity -> entity instanceof LivingEntity)
@@ -48,21 +52,21 @@ public class OpenGLHFClient implements ClientModInitializer {
         for (LivingEntity entity : entities) {
 
             // from WorldRenderer.renderEntity
-            double d = MathHelper.lerp((double)tickDelta, entity.lastRenderX, entity.getX());
-            double e = MathHelper.lerp((double)tickDelta, entity.lastRenderY, entity.getY());
-            double f = MathHelper.lerp((double)tickDelta, entity.lastRenderZ, entity.getZ());
+            double lerpedEntityX = MathHelper.lerp((double) tickDelta, entity.lastRenderX, entity.getX());
+            double lerpedEntityY = MathHelper.lerp((double) tickDelta, entity.lastRenderY, entity.getY());
+            double lerpedEntityZ = MathHelper.lerp((double) tickDelta, entity.lastRenderZ, entity.getZ());
             var cameraPos = worldRenderContext.camera().getPos();
-            double g = d - cameraPos.x;
-            double h = e - cameraPos.y;
-            double i = f - cameraPos.z;
 
             // from EntityRenderDispatcher.render
-            Vec3d vec3d = dispatcher.getRenderer(entity).getPositionOffset(entity, tickDelta);
-            double j = g + vec3d.getX();
-            double k = h + vec3d.getY();
-            double l = i + vec3d.getZ();
+            Vec3d entityOffset = dispatcher.getRenderer(entity).getPositionOffset(entity, tickDelta);
+
+
+            double dX = lerpedEntityX - cameraPos.x + entityOffset.getX();
+            double dY = lerpedEntityY - cameraPos.y + entityOffset.getY();
+            double dZ = lerpedEntityZ - cameraPos.z + entityOffset.getZ();
+
             matrices.push();
-            matrices.translate(j, k, l);
+            matrices.translate(dX, dY, dZ);
 
             //from EntityRenderer.render
             renderLabelIfPresent(entity, Text.of("Test"), worldRenderContext.matrixStack(), worldRenderContext.consumers(), tickDelta);
