@@ -1,14 +1,9 @@
 package com.cgh.openglhf.openglhf.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.renderer.v1.Renderer;
-import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryUtil;
 
@@ -29,14 +24,18 @@ public class EntityBoxRenderer {
         vbo = GL33.glGenBuffers();
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vbo);
 
-        GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
+        GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 24, 0);
         GL33.glEnableVertexAttribArray(0);
+
+        GL33.glVertexAttribPointer(1, 3, GL33.GL_FLOAT, false, 24, 12);
+        GL33.glEnableVertexAttribArray(1);
 
         unbindBuffers();
 
         shaderProgram = new ShaderProgram();
         shaderProgram.createVertexShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.vert"));
-        shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.frag"));
+        shaderProgram.createGeometryShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.geom"));
+        shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/box.frag"));
         shaderProgram.link();
     }
 
@@ -57,19 +56,8 @@ public class EntityBoxRenderer {
 
         var vertices = StreamSupport.stream(entities.spliterator(), false)
                 .filter(e -> e instanceof SheepEntity)
-                .flatMapToDouble(e -> boxToLineVertices(e.getBoundingBox()))
+                .flatMapToDouble(e -> boxMinMaxToVertices(e.getBoundingBox()))
                 .toArray();
-
-        // override calculated vertices with
-        // fixed, test NDC vertices
-        // expectation: draw a rectangle in the players view
-        /*
-        vertices = new double[] {
-                0.0, 0.0, 0.0,
-                -0.5, 0.0, 0.0,
-                -0.5, 0.5, 0.0
-        };
-        */
 
         var vertexBufferData = MemoryUtil.memAllocFloat(vertices.length);
         vertexBufferData.put(doublesToFloat(vertices)).flip();
@@ -83,7 +71,7 @@ public class EntityBoxRenderer {
 
         shaderProgram.bind();
 
-        GL33.glDrawArrays(GL33.GL_LINES, 0, vertices.length / 3);
+        GL33.glDrawArrays(GL33.GL_POINTS, 0, 2);
 
         shaderProgram.unbind();
 
@@ -112,13 +100,6 @@ public class EntityBoxRenderer {
         for (int i = 0; i < array.length; i++)
             inFloatForm[i] = (float) array[i];
         return inFloatForm;
-    }
-
-    private DoubleStream describeBoxAsFloats(Box box) {
-        return DoubleStream.of(
-                box.maxX, box.maxY, box.maxZ,
-                box.minX, box.minY, box.minZ
-        );
     }
 
     private DoubleStream boxToLineVertices(Box box) {
@@ -168,6 +149,15 @@ public class EntityBoxRenderer {
 
                 minX, minY, minZ,
                 minX, maxY, minZ
+        );
+    }
+
+    private DoubleStream boxMinMaxToVertices(Box box) {
+        return DoubleStream.of(
+                box.maxX, box.maxY, box.maxZ,
+                0.0, 0.0, 1.0, // b
+                box.minX, box.minY, box.minZ,
+                0.0, 1.0, 0.0 // g
         );
     }
 
