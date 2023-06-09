@@ -24,11 +24,8 @@ public class EntityBoxRenderer {
         vbo = GL33.glGenBuffers();
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vbo);
 
-        GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 24, 0);
+        GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
         GL33.glEnableVertexAttribArray(0);
-
-        GL33.glVertexAttribPointer(1, 3, GL33.GL_FLOAT, false, 24, 12);
-        GL33.glEnableVertexAttribArray(1);
 
         unbindBuffers();
 
@@ -71,7 +68,7 @@ public class EntityBoxRenderer {
 
         shaderProgram.bind();
 
-        GL33.glDrawArrays(GL33.GL_POINTS, 0, 2);
+        GL33.glDrawArrays(GL33.GL_LINES, 0, vertices.length / 2);
 
         shaderProgram.unbind();
 
@@ -155,9 +152,7 @@ public class EntityBoxRenderer {
     private DoubleStream boxMinMaxToVertices(Box box) {
         return DoubleStream.of(
                 box.maxX, box.maxY, box.maxZ,
-                0.0, 0.0, 1.0, // b
-                box.minX, box.minY, box.minZ,
-                0.0, 1.0, 0.0 // g
+                box.minX, box.minY, box.minZ
         );
     }
 
