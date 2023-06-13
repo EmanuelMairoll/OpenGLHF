@@ -11,13 +11,13 @@ import org.lwjgl.system.MemoryUtil;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
-public class EntityBoxRenderer {
+public class EntityRectRenderer {
 
     private final int vao;
     private final int vbo;
     private final ShaderProgram shaderProgram;
 
-    public EntityBoxRenderer() throws Exception {
+    public EntityRectRenderer() throws Exception {
 
         vao = GL33.glGenVertexArrays();
         GL33.glBindVertexArray(vao);

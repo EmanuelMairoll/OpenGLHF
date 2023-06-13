@@ -26,4 +26,11 @@ public class Utils {
 
         return result.toString();
     }
+
+    public static float[] doublesToFloat(double[] array) {
+        float[] inFloatForm = new float[array.length];
+        for (int i = 0; i < array.length; i++)
+            inFloatForm[i] = (float) array[i];
+        return inFloatForm;
+    }
 }

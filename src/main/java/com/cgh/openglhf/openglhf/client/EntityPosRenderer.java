@@ -60,7 +60,7 @@ public class EntityPosRenderer {
                 .flatMapToDouble(e -> mapVertices(e, tickDelta))
                 .toArray();
         var vertexBuffer = MemoryUtil.memAllocFloat(vertices.length);
-        vertexBuffer.put(doublesToFloat(vertices)).flip();
+        vertexBuffer.put(Utils.doublesToFloat(vertices)).flip();
         GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertexBuffer, GL33.GL_STATIC_DRAW);
         MemoryUtil.memFree(vertexBuffer);
 
@@ -97,10 +97,4 @@ public class EntityPosRenderer {
         shaderProgram.cleanup();
     }
 
-    private float[] doublesToFloat(double[] array) {
-        float[] inFloatForm = new float[array.length];
-        for (int i = 0; i < array.length; i++)
-            inFloatForm[i] = (float) array[i];
-        return inFloatForm;
-    }
 }
