@@ -2,7 +2,7 @@ package com.cgh.openglhf.openglhf.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 
-public class EntityBoxRenderer {
+public class EntityBoxRenderer implements OpenGLHFRenderer {
 
     private final EntityBoundingBoxRenderer boundingBoxRenderer;
 
@@ -19,6 +19,17 @@ public class EntityBoxRenderer {
         this.boundingBoxRenderer = new EntityBoundingBoxRenderer(shaderProgram);
 
     }
+
+    @Override
+    public boolean isRenderingEnabled() {
+        return boundingBoxRenderer.isRenderingEnabled();
+    }
+
+    @Override
+    public void setRenderingEnabled(boolean renderingEnabled) {
+        this.boundingBoxRenderer.setRenderingEnabled(renderingEnabled);
+    }
+
 
     public void render(WorldRenderContext worldRenderContext) {
         this.boundingBoxRenderer.render(worldRenderContext);

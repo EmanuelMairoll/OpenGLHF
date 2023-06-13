@@ -11,11 +11,12 @@ import org.lwjgl.system.MemoryUtil;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
-public class EntityBoundingBoxRenderer {
+public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
 
     private final int vao;
     private final int vbo;
     private ShaderProgram shaderProgram;
+    private boolean renderingEnabled = true;
 
     public EntityBoundingBoxRenderer(ShaderProgram shaderProgram) throws Exception {
 
@@ -34,6 +35,8 @@ public class EntityBoundingBoxRenderer {
     }
 
     public void render(WorldRenderContext worldRenderContext) {
+        if(!renderingEnabled) return;
+
         var cameraPos = worldRenderContext.camera().getPos();
         var matrices = worldRenderContext.matrixStack();
 
@@ -75,6 +78,15 @@ public class EntityBoundingBoxRenderer {
         unbindBuffers();
     }
 
+    @Override
+    public boolean isRenderingEnabled() {
+        return renderingEnabled;
+    }
+
+    @Override
+    public void setRenderingEnabled(boolean renderingEnabled) {
+        this.renderingEnabled = renderingEnabled;
+    }
 
     private void unbindBuffers() {
         GL33.glBindVertexArray(0);

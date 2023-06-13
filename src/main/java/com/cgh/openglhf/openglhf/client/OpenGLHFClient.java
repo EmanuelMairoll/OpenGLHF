@@ -28,7 +28,7 @@ public class OpenGLHFClient implements ClientModInitializer {
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
         entityPosRenderer.render(worldRenderContext);
-        //entityRectRenderer.render(worldRenderContext);
+        entityRectRenderer.render(worldRenderContext);
         entityBoxRenderer.render(worldRenderContext);
     }
 }

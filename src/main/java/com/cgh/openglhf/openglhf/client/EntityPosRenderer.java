@@ -15,11 +15,12 @@ import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
-public class EntityPosRenderer {
+public class EntityPosRenderer implements OpenGLHFRenderer {
 
     private final int vao;
     private final int vbo;
     private final ShaderProgram shaderProgram;
+    private boolean renderingEnabled = true;
 
     public EntityPosRenderer() throws Exception {
 
@@ -42,6 +43,8 @@ public class EntityPosRenderer {
     }
 
     public void render(WorldRenderContext worldRenderContext) {
+        if(!renderingEnabled) return;
+
         var pos = worldRenderContext.camera().getPos();
         var matrices = worldRenderContext.matrixStack();
         matrices.push();
@@ -71,6 +74,16 @@ public class EntityPosRenderer {
         shaderProgram.unbind();
 
         unbindBuffers();
+    }
+
+    @Override
+    public boolean isRenderingEnabled() {
+        return renderingEnabled;
+    }
+
+    @Override
+    public void setRenderingEnabled(boolean renderingEnabled) {
+        this.renderingEnabled = renderingEnabled;
     }
 
     private DoubleStream mapVertices(Entity entity, float tickDelta) {
