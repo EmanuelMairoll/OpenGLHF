@@ -8,6 +8,7 @@ import net.minecraft.client.MinecraftClient;
 public class OpenGLHFClient implements ClientModInitializer {
     private EntityPosRenderer entityPosRenderer;
     private EntityRectRenderer entityRectRenderer;
+    private EntityBoxRenderer entityBoxRenderer;
 
     @Override
     public void onInitializeClient() {
@@ -15,6 +16,7 @@ public class OpenGLHFClient implements ClientModInitializer {
             try {
                 entityPosRenderer = new EntityPosRenderer();
                 entityRectRenderer = new EntityRectRenderer();
+                entityBoxRenderer = new EntityBoxRenderer();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -26,6 +28,7 @@ public class OpenGLHFClient implements ClientModInitializer {
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
         entityPosRenderer.render(worldRenderContext);
-        entityRectRenderer.render(worldRenderContext);
+        //entityRectRenderer.render(worldRenderContext);
+        entityBoxRenderer.render(worldRenderContext);
     }
 }

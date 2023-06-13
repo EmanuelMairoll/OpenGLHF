@@ -6,5 +6,5 @@ uniform mat4 ProjMat;
 
 void main()
 {
-    gl_Position = vec4(boxWorld, 1.0);
+     gl_Position = vec4(boxWorld, 1.0);
 }
