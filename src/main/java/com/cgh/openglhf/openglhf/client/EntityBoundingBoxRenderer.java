@@ -16,7 +16,7 @@ public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
     private final int vao;
     private final int vbo;
     private ShaderProgram shaderProgram;
-    private boolean renderingEnabled = true;
+    private boolean renderingEnabled = false;
 
     public EntityBoundingBoxRenderer(ShaderProgram shaderProgram) throws Exception {
 

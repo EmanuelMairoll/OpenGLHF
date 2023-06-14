@@ -2,16 +2,12 @@ package com.cgh.openglhf.openglhf.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryUtil;
 
-import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
@@ -20,7 +16,7 @@ public class EntityPosRenderer implements OpenGLHFRenderer {
     private final int vao;
     private final int vbo;
     private final ShaderProgram shaderProgram;
-    private boolean renderingEnabled = true;
+    private boolean renderingEnabled = false;
 
     public EntityPosRenderer() throws Exception {
 
