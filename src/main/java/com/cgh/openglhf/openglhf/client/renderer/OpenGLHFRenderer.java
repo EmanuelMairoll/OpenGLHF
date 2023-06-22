@@ -1,4 +1,4 @@
-package com.cgh.openglhf.openglhf.client;
+package com.cgh.openglhf.openglhf.client.renderer;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 

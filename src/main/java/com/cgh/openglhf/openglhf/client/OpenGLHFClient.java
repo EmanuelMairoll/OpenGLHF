@@ -1,5 +1,8 @@
 package com.cgh.openglhf.openglhf.client;
 
+import com.cgh.openglhf.openglhf.client.renderer.EntityBoxRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.EntityPosRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.EntityRectRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;

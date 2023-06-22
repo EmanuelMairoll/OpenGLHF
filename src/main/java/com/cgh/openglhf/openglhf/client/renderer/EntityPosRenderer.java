@@ -1,5 +1,7 @@
-package com.cgh.openglhf.openglhf.client;
+package com.cgh.openglhf.openglhf.client.renderer;
 
+import com.cgh.openglhf.openglhf.client.ShaderProgram;
+import com.cgh.openglhf.openglhf.client.Utils;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
