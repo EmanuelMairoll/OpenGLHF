@@ -2,8 +2,8 @@ package com.cgh.openglhf.openglhf.client;
 
 import com.cgh.openglhf.openglhf.client.renderer.blaze3d.InfoPanelRenderer;
 import com.cgh.openglhf.openglhf.client.renderer.custom.BoxRenderer;
-import com.cgh.openglhf.openglhf.client.renderer.custom.RectRenderer;
 import com.cgh.openglhf.openglhf.client.renderer.custom.TraceRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.custom.RectRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -19,9 +20,7 @@ public class OpenGLHFClient implements ClientModInitializer {
     private TraceRenderer traceRenderer;
     private RectRenderer rectRenderer;
     private BoxRenderer boxRenderer;
-
     private InfoPanelRenderer infoPanelRenderer;
-
 
     private static final KeyBinding POS_RENDERER_KEY_BINDING;
     private static final KeyBinding RECT_RENDERER_KEY_BINDING;
@@ -70,6 +69,7 @@ public class OpenGLHFClient implements ClientModInitializer {
         });
 
         WorldRenderEvents.AFTER_ENTITIES.register(this::renderAfterEntities);
+        ClientTickEvents.END_WORLD_TICK.register(this::updateAnimations);
         ClientTickEvents.END_CLIENT_TICK.register(this::handleKeyBindings);
 
     }
@@ -112,4 +112,9 @@ public class OpenGLHFClient implements ClientModInitializer {
         boxRenderer.render(worldRenderContext);
         infoPanelRenderer.render(worldRenderContext);
     }
+
+    private void updateAnimations(ClientWorld clientWorld) {
+        infoPanelRenderer.updateAnimations();
+    }
+
 }
