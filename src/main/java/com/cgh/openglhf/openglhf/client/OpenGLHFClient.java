@@ -1,8 +1,8 @@
 package com.cgh.openglhf.openglhf.client;
 
-import com.cgh.openglhf.openglhf.client.renderer.EntityBoxRenderer;
-import com.cgh.openglhf.openglhf.client.renderer.EntityPosRenderer;
-import com.cgh.openglhf.openglhf.client.renderer.EntityRectRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.custom.BoxRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.custom.RectRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.custom.TraceRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -15,9 +15,9 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 public class OpenGLHFClient implements ClientModInitializer {
-    private EntityPosRenderer entityPosRenderer;
-    private EntityRectRenderer entityRectRenderer;
-    private EntityBoxRenderer entityBoxRenderer;
+    private TraceRenderer traceRenderer;
+    private RectRenderer rectRenderer;
+    private BoxRenderer boxRenderer;
 
     private static final KeyBinding POS_RENDERER_KEY_BINDING;
     private static final KeyBinding RECT_RENDERER_KEY_BINDING;
@@ -62,9 +62,9 @@ public class OpenGLHFClient implements ClientModInitializer {
     }
 
     private void initRenderers() throws Exception {
-        entityPosRenderer = new EntityPosRenderer();
-        entityRectRenderer = new EntityRectRenderer();
-        entityBoxRenderer = new EntityBoxRenderer();
+        traceRenderer = new TraceRenderer();
+        rectRenderer = new RectRenderer();
+        boxRenderer = new BoxRenderer();
     }
 
     private void handleKeyBindings(MinecraftClient client) {
@@ -72,24 +72,24 @@ public class OpenGLHFClient implements ClientModInitializer {
         if(client.player == null) return;
 
         if (POS_RENDERER_KEY_BINDING.wasPressed()) {
-            entityPosRenderer.setRenderingEnabled(!entityPosRenderer.isRenderingEnabled());
-            client.player.sendMessage(Text.literal(String.format("POS renderer: %b", entityPosRenderer.isRenderingEnabled())), false);
+            traceRenderer.setRenderingEnabled(!traceRenderer.isRenderingEnabled());
+            client.player.sendMessage(Text.literal(String.format("TRACE renderer: %b", traceRenderer.isRenderingEnabled())), false);
         }
 
         if (RECT_RENDERER_KEY_BINDING.wasPressed()) {
-            entityRectRenderer.setRenderingEnabled(!entityRectRenderer.isRenderingEnabled());
-            client.player.sendMessage(Text.literal(String.format("RECT renderer: %b", entityRectRenderer.isRenderingEnabled())), false);
+            rectRenderer.setRenderingEnabled(!rectRenderer.isRenderingEnabled());
+            client.player.sendMessage(Text.literal(String.format("RECT renderer: %b", rectRenderer.isRenderingEnabled())), false);
         }
 
         if (BOX_RENDERER_KEY_BINDING.wasPressed()) {
-            entityBoxRenderer.setRenderingEnabled(!entityBoxRenderer.isRenderingEnabled());
-            client.player.sendMessage(Text.literal(String.format("BOX renderer: %b", entityBoxRenderer.isRenderingEnabled())), false);
+            boxRenderer.setRenderingEnabled(!boxRenderer.isRenderingEnabled());
+            client.player.sendMessage(Text.literal(String.format("BOX renderer: %b", boxRenderer.isRenderingEnabled())), false);
         }
     }
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
-        entityPosRenderer.render(worldRenderContext);
-        entityRectRenderer.render(worldRenderContext);
-        entityBoxRenderer.render(worldRenderContext);
+        traceRenderer.render(worldRenderContext);
+        rectRenderer.render(worldRenderContext);
+        boxRenderer.render(worldRenderContext);
     }
 }

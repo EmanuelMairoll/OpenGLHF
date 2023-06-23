@@ -1,26 +1,26 @@
-package com.cgh.openglhf.openglhf.client.renderer;
+package com.cgh.openglhf.openglhf.client.renderer.custom;
 
 import com.cgh.openglhf.openglhf.client.ShaderProgram;
 import com.cgh.openglhf.openglhf.client.Utils;
+import com.cgh.openglhf.openglhf.client.renderer.OpenGLHFRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.entity.LivingEntity;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
-public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
+public abstract class AbstractPosRenderer implements OpenGLHFRenderer {
 
     private final int vao;
     private final int vbo;
     private ShaderProgram shaderProgram;
     private boolean renderingEnabled = false;
 
-    public EntityBoundingBoxRenderer(ShaderProgram shaderProgram) throws Exception {
+    public AbstractPosRenderer() {
 
         vao = GL33.glGenVertexArrays();
         GL33.glBindVertexArray(vao);
@@ -31,13 +31,31 @@ public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
         GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
         GL33.glEnableVertexAttribArray(0);
 
-        this.shaderProgram = shaderProgram;
+        try {
+            this.shaderProgram = makeShader();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
-        unbindBuffers();
+        GL33.glBindVertexArray(0);
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
     }
+
+    protected abstract ShaderProgram makeShader() throws Exception;
+
+    protected abstract DoubleStream toVertices(Entity entity, float tickDelta);
+
+    protected abstract void glDrawArrays(int length);
 
     public void render(WorldRenderContext worldRenderContext) {
         if(!renderingEnabled) return;
+
+        var player = MinecraftClient.getInstance().player;
+        if(player == null) return;
+
+        var world = MinecraftClient.getInstance().world;
+        if(world == null) return;
 
         var cameraPos = worldRenderContext.camera().getPos();
         var matrices = worldRenderContext.matrixStack();
@@ -48,14 +66,15 @@ public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
         matrices.pop();
         shaderProgram.setProjectionMat(worldRenderContext.projectionMatrix());
 
+        int prevVAO = GL33.glGetInteger(GL33.GL_VERTEX_ARRAY_BINDING);
         GL33.glBindVertexArray(vao);
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vbo);
 
-        var entities = MinecraftClient.getInstance().world.getEntities();
-
-        var vertices = StreamSupport.stream(entities.spliterator(), false)
-                .filter(e -> e instanceof SheepEntity)
-                .flatMapToDouble(e -> boxMinMaxToVertices(e, worldRenderContext.tickDelta()))
+        var vertices = StreamSupport.stream(world.getEntities().spliterator(), false)
+                .filter(entity -> entity instanceof LivingEntity)
+                .map(entity -> (LivingEntity) entity)
+                .filter(entity -> entity != player)
+                .flatMapToDouble(e -> toVertices(e, worldRenderContext.tickDelta()))
                 .toArray();
 
         var vertexBufferData = MemoryUtil.memAllocFloat(vertices.length);
@@ -70,14 +89,15 @@ public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
 
         shaderProgram.bind();
 
-        GL33.glDrawArrays(GL33.GL_LINES, 0, vertices.length / 3);
+        glDrawArrays(vertices.length / 3);
 
         shaderProgram.unbind();
 
         GL33.glEnable(GL33.GL_CULL_FACE);
         GL33.glEnable(GL33.GL_DEPTH_TEST);
 
-        unbindBuffers();
+        GL33.glBindVertexArray(prevVAO);
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
     }
 
     @Override
@@ -88,22 +108,5 @@ public class EntityBoundingBoxRenderer implements OpenGLHFRenderer {
     @Override
     public void setRenderingEnabled(boolean renderingEnabled) {
         this.renderingEnabled = renderingEnabled;
-    }
-
-    private void unbindBuffers() {
-        GL33.glBindVertexArray(0);
-        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
-    }
-
-    private DoubleStream boxMinMaxToVertices(Entity entity, float tickDelta) {
-        var lerpX = MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-        var lerpY = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-        var lerpZ = MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
-        var box = entity.getBoundingBox().offset(lerpX, lerpY, lerpZ);
-
-        return DoubleStream.of(
-                box.minX, box.minY, box.minZ,
-                box.maxX, box.maxY, box.maxZ
-        );
     }
 }
