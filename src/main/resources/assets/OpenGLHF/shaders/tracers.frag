@@ -8,8 +8,6 @@ uniform ivec2 viewportDimensions;
 
 #define MAX_DISTANCE 100.0
 
-#define M_PI 3.1415926535897932384626433832795
-
 bool isInEllipse(vec2 point)
 {
     // https://math.stackexchange.com/a/76463
