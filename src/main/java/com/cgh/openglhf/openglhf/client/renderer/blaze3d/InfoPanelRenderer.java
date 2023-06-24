@@ -56,11 +56,9 @@ public class InfoPanelRenderer implements OpenGLHFRenderer {
                         if (v == null) {
                             return lookingAt ? p(0, 1) : p(0, 0);
                         } else {
-                            if (lookingAt) {
-                                return p(v.getRight(), Math.min(v.getRight() + 1, 5));
-                            } else {
-                                return p(v.getRight(), Math.max(v.getRight() - 1, 0));
-                            }
+                            return lookingAt ?
+                                    p(v.getRight(), Math.min(v.getRight() + 1, 5)) :
+                                    p(v.getRight(), Math.max(v.getRight() - 1, 0));
                         }
                     });
                 });
@@ -103,7 +101,6 @@ public class InfoPanelRenderer implements OpenGLHFRenderer {
             }
 
             var scale = bezierBlend(MathHelper.lerp(tickDelta, (float) lcScale.getLeft(), (float) lcScale.getRight()) / 5.0F);
-            System.out.println(entity.getName().getString() + " " + lcScale.getLeft() + " " + lcScale.getRight() + " " + scale);
 
             double lerpedEntityPosX = MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX());
             double lerpedEntityPosY = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY());
