@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL33;
 
 import java.nio.FloatBuffer;
 
@@ -164,6 +165,12 @@ public class ShaderProgram {
         public void setUniformMatrix4fv(FloatBuffer matrix) {
             this.saveCurrentProgramAndSwitch();
             GL20.glUniformMatrix4fv(location, false, matrix);
+            this.restoreProgram();
+        }
+
+        public void setVec2i(int v0, int v1) {
+            this.saveCurrentProgramAndSwitch();
+            GL33.glUniform2iv(location, new int[] {v0, v1});
             this.restoreProgram();
         }
     }

@@ -17,7 +17,9 @@ import java.util.stream.StreamSupport;
 
 public class TraceRenderer implements OpenGLHFRenderer {
 
-    private ShaderProgram.GLUniform distance;
+    private ShaderProgram.GLUniform majorAxis;
+    private ShaderProgram.GLUniform minorAxis;
+    private ShaderProgram.GLUniform viewportDimensions;
 
     private final int vao;
     private final int vbo;
@@ -56,7 +58,9 @@ public class TraceRenderer implements OpenGLHFRenderer {
         shaderProgram.createFragmentShader(Utils.loadResource("/assets/OpenGLHF/shaders/tracers.frag"));
         shaderProgram.link();
 
-        this.distance = shaderProgram.createGLUniformIfExists("distance");
+        this.majorAxis = shaderProgram.createGLUniformIfExists("majorAxis");
+        this.minorAxis = shaderProgram.createGLUniformIfExists("minorAxis");
+        this.viewportDimensions = shaderProgram.createGLUniformIfExists("viewportDimensions");
 
         return shaderProgram;
     }
@@ -78,13 +82,13 @@ public class TraceRenderer implements OpenGLHFRenderer {
     }
 
     public void render(WorldRenderContext worldRenderContext) {
-        if(!renderingEnabled) return;
+        if (!renderingEnabled) return;
 
         var player = MinecraftClient.getInstance().player;
-        if(player == null) return;
+        if (player == null) return;
 
         var world = MinecraftClient.getInstance().world;
-        if(world == null) return;
+        if (world == null) return;
 
         var cameraPos = worldRenderContext.camera().getPos();
         var matrices = worldRenderContext.matrixStack();
@@ -118,9 +122,18 @@ public class TraceRenderer implements OpenGLHFRenderer {
 
         shaderProgram.bind();
 
+
+        int dim[] = new int[4];
+        GL33.glGetIntegerv(GL33.GL_VIEWPORT, dim);
+        
+        this.viewportDimensions.setVec2i(dim[2], dim[3]);
+        this.minorAxis.setUniform1f(0.6f);
+        this.majorAxis.setUniform1f(0.6f);
+
         glDrawArrays(vertices.length / 4);
 
         shaderProgram.unbind();
+
 
         GL33.glEnable(GL33.GL_CULL_FACE);
         GL33.glEnable(GL33.GL_DEPTH_TEST);
