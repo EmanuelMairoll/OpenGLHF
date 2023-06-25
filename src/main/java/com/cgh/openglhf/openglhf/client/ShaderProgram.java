@@ -31,6 +31,15 @@ public class ShaderProgram {
         }
     }
 
+    public static String shaderTypeToString(int shaderType) {
+        return switch (shaderType) {
+            case GL_VERTEX_SHADER -> "VERTEX";
+            case GL_FRAGMENT_SHADER -> "FRAGMENT";
+            case GL_GEOMETRY_SHADER -> "GEOMETRY";
+            default -> "UNKNOWN";
+        };
+    }
+
     public GLUniform createGLUniformIfExists(String name) {
         return ShaderProgram.GLUniform.createIfExists(this.programId, name);
     }
@@ -50,14 +59,14 @@ public class ShaderProgram {
     protected int createShader(String shaderCode, int shaderType) throws Exception {
         int shaderId = glCreateShader(shaderType);
         if (shaderId == 0) {
-            throw new Exception("Error creating shader. Type: " + shaderType);
+            throw new Exception("Error creating shader. Type: " + shaderTypeToString(shaderType));
         }
 
         glShaderSource(shaderId, shaderCode);
         glCompileShader(shaderId);
 
         if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
-            throw new Exception("Error compiling Shader code: " + "(" + shaderType + ") " + glGetShaderInfoLog(shaderId, 1024));
+            throw new Exception("Error compiling Shader code: " + "(" + shaderTypeToString(shaderType) + ") " + glGetShaderInfoLog(shaderId, 1024));
         }
 
         glAttachShader(programId, shaderId);
@@ -170,7 +179,13 @@ public class ShaderProgram {
 
         public void setVec2i(int v0, int v1) {
             this.saveCurrentProgramAndSwitch();
-            GL33.glUniform2iv(location, new int[] {v0, v1});
+            GL33.glUniform2iv(location, new int[]{v0, v1});
+            this.restoreProgram();
+        }
+
+        public void setBool(boolean b) {
+            this.saveCurrentProgramAndSwitch();
+            GL33.glUniform1i(location, b ? 1 : 0);
             this.restoreProgram();
         }
     }
