@@ -44,7 +44,7 @@ public class TraceRenderer extends AbstractPosRenderer {
         this.minorAxisUniform = shaderProgram.createGLUniformIfExists("minorAxis");
         this.viewportDimensionsUniform = shaderProgram.createGLUniformIfExists("viewportDimensions");
         this.ellipseTestUniform = shaderProgram.createGLUniformIfExists("ellipseTest");
-        this.maxDistanceUniform = shaderProgram.createGLUniformIfExists("maxDistanceUniform");
+        this.maxDistanceUniform = shaderProgram.createGLUniformIfExists("maxDistance");
 
         return shaderProgram;
     }
