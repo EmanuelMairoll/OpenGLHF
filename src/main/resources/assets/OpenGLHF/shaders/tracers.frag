@@ -6,8 +6,7 @@ uniform float majorAxis;
 uniform float minorAxis;
 uniform ivec2 viewportDimensions;
 uniform bool ellipseTest;
-
-#define MAX_DISTANCE 100.0
+uniform float maxDistance;
 
 bool isInEllipse(vec2 point)
 {
@@ -24,8 +23,8 @@ void main()
 
     if (ellipseTest && isInEllipse(FragCoord)) discard;
 
-    float distanceClamped = clamp(MAX_DISTANCE, 0.0, distanceGeom);
-    float x = distanceClamped / MAX_DISTANCE;
+    float distanceClamped = clamp(maxDistance, 0.0, distanceGeom);
+    float x = distanceClamped / maxDistance;
 
     // https://stackoverflow.com/q/6394304
     float r = 2.0 * (1.0 - x);

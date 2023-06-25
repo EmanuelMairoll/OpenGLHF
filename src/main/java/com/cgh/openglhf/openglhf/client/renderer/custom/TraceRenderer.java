@@ -15,10 +15,13 @@ public class TraceRenderer extends AbstractPosRenderer {
     private ShaderProgram.GLUniform minorAxisUniform;
     private ShaderProgram.GLUniform viewportDimensionsUniform;
     private ShaderProgram.GLUniform ellipseTestUniform;
+    private ShaderProgram.GLUniform maxDistanceUniform;
 
     private float majorAxis = 0.f;
     private float minorAxis = 0.f;
+    private float maxDistance = 100.f;
     private boolean ellipseTest = false;
+
 
     @Override
     protected void configureBuffers(int vao, int vbo) {
@@ -41,6 +44,7 @@ public class TraceRenderer extends AbstractPosRenderer {
         this.minorAxisUniform = shaderProgram.createGLUniformIfExists("minorAxis");
         this.viewportDimensionsUniform = shaderProgram.createGLUniformIfExists("viewportDimensions");
         this.ellipseTestUniform = shaderProgram.createGLUniformIfExists("ellipseTest");
+        this.maxDistanceUniform = shaderProgram.createGLUniformIfExists("maxDistanceUniform");
 
         return shaderProgram;
     }
@@ -66,6 +70,7 @@ public class TraceRenderer extends AbstractPosRenderer {
         this.minorAxisUniform.setUniform1f(minorAxis);
         this.majorAxisUniform.setUniform1f(majorAxis);
         this.ellipseTestUniform.setBool(ellipseTest && (majorAxis > 0) && (minorAxis > 0));
+        this.maxDistanceUniform.setUniform1f(maxDistance);
     }
 
     public void setEllipseTestMinorAxis(float minorAxis) {
@@ -78,6 +83,10 @@ public class TraceRenderer extends AbstractPosRenderer {
 
     public void setEllipseTestEnabled(boolean ellipseTest) {
         this.ellipseTest = ellipseTest;
+    }
+
+    public void setMaxDistance(float maxDistance) {
+        this.maxDistance = maxDistance;
     }
 
     public boolean isEllipseTestEnabled() {
