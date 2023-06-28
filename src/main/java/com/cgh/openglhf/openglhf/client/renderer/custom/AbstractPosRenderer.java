@@ -28,8 +28,7 @@ public abstract class AbstractPosRenderer implements OpenGLHFRenderer {
         vbo = GL33.glGenBuffers();
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vbo);
 
-        GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
-        GL33.glEnableVertexAttribArray(0);
+        configureBuffers(vao, vbo);
 
         try {
             this.shaderProgram = makeShader();
@@ -42,11 +41,15 @@ public abstract class AbstractPosRenderer implements OpenGLHFRenderer {
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
     }
 
+    protected abstract void configureBuffers(final int vao, final int vbo);
+
     protected abstract ShaderProgram makeShader() throws Exception;
 
     protected abstract DoubleStream toVertices(Entity entity, float tickDelta);
 
     protected abstract void glDrawArrays(int length);
+
+    protected void updateUniforms() {}
 
     public void render(WorldRenderContext worldRenderContext) {
         if(!renderingEnabled) return;
@@ -89,7 +92,9 @@ public abstract class AbstractPosRenderer implements OpenGLHFRenderer {
 
         shaderProgram.bind();
 
-        glDrawArrays(vertices.length / 3);
+        updateUniforms();
+
+        glDrawArrays(vertices.length);
 
         shaderProgram.unbind();
 

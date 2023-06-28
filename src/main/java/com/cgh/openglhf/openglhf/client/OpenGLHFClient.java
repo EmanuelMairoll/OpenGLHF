@@ -2,6 +2,7 @@ package com.cgh.openglhf.openglhf.client;
 
 import com.cgh.openglhf.openglhf.client.renderer.blaze3d.InfoPanelRenderer;
 import com.cgh.openglhf.openglhf.client.renderer.custom.BoxRenderer;
+import com.cgh.openglhf.openglhf.client.renderer.custom.EllipseRenderer;
 import com.cgh.openglhf.openglhf.client.renderer.custom.TraceRenderer;
 import com.cgh.openglhf.openglhf.client.renderer.custom.RectRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -21,11 +22,14 @@ public class OpenGLHFClient implements ClientModInitializer {
     private RectRenderer rectRenderer;
     private BoxRenderer boxRenderer;
     private InfoPanelRenderer infoPanelRenderer;
+    private EllipseRenderer ellipseRenderer;
 
     private static final KeyBinding POS_RENDERER_KEY_BINDING;
     private static final KeyBinding RECT_RENDERER_KEY_BINDING;
     private static final KeyBinding BOX_RENDERER_KEY_BINDING;
     private static final KeyBinding PANEL_RENDERER_KEY_BINDING;
+    private static final KeyBinding ELLIPSE_RENDERER_KEY_BINDING;
+    private static final KeyBinding TRACER_ELLIPSE_TEST_KEY_BINDING;
 
     static {
         POS_RENDERER_KEY_BINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -36,24 +40,38 @@ public class OpenGLHFClient implements ClientModInitializer {
         ));
 
         RECT_RENDERER_KEY_BINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.openglhf.rect", // The translation key of the keybinding's name
-                InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
-                GLFW.GLFW_KEY_F7, // The keycode of the key
-                "category.openglhf.rect" // The translation key of the keybinding's category.
+                "key.openglhf.rect",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F7,
+                "category.openglhf.rect"
         ));
 
         BOX_RENDERER_KEY_BINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.openglhf.box", // The translation key of the keybinding's name
-                InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
-                GLFW.GLFW_KEY_F8, // The keycode of the key
-                "category.openglhf.box" // The translation key of the keybinding's category.
+                "key.openglhf.box",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F8,
+                "category.openglhf.box"
         ));
 
         PANEL_RENDERER_KEY_BINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.openglhf.panel", // The translation key of the keybinding's name
-                InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
-                GLFW.GLFW_KEY_F9, // The keycode of the key
-                "category.openglhf.panel" // The translation key of the keybinding's category.
+                "key.openglhf.panel",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F9,
+                "category.openglhf.panel"
+        ));
+
+        ELLIPSE_RENDERER_KEY_BINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.openglhf.ellipse",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F10,
+                "category.openglhf.ellipse"
+        ));
+
+        TRACER_ELLIPSE_TEST_KEY_BINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.openglhf.ellipse_test",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F12,
+                "category.openglhf.ellipse_test"
         ));
 
     }
@@ -76,6 +94,10 @@ public class OpenGLHFClient implements ClientModInitializer {
 
     private void initRenderers() throws Exception {
         traceRenderer = new TraceRenderer();
+        traceRenderer.setEllipseTestMajorAxis(0.4f);
+        traceRenderer.setEllipseTestMinorAxis(0.4f);
+        ellipseRenderer = new EllipseRenderer(0.4f, 0.4f);
+
         rectRenderer = new RectRenderer();
         boxRenderer = new BoxRenderer();
         infoPanelRenderer = new InfoPanelRenderer();
@@ -104,6 +126,16 @@ public class OpenGLHFClient implements ClientModInitializer {
             infoPanelRenderer.setRenderingEnabled(!infoPanelRenderer.isRenderingEnabled());
             client.player.sendMessage(Text.literal(String.format("PANEL renderer: %b", infoPanelRenderer.isRenderingEnabled())), false);
         }
+
+        if (ELLIPSE_RENDERER_KEY_BINDING.wasPressed()) {
+            ellipseRenderer.setRenderingEnabled(!ellipseRenderer.isRenderingEnabled());
+            client.player.sendMessage(Text.literal(String.format("ELLIPSE renderer: %b", ellipseRenderer.isRenderingEnabled())), false);
+        }
+
+        if (TRACER_ELLIPSE_TEST_KEY_BINDING.wasPressed()) {
+            traceRenderer.setEllipseTestEnabled(!traceRenderer.isEllipseTestEnabled());
+            client.player.sendMessage(Text.literal(String.format("TRACER ellipse test: %b", traceRenderer.isEllipseTestEnabled())), false);
+        }
     }
 
     private void renderAfterEntities(WorldRenderContext worldRenderContext) {
@@ -111,6 +143,7 @@ public class OpenGLHFClient implements ClientModInitializer {
         rectRenderer.render(worldRenderContext);
         boxRenderer.render(worldRenderContext);
         infoPanelRenderer.render(worldRenderContext);
+        ellipseRenderer.render(worldRenderContext);
     }
 
     private void updateAnimations(ClientWorld clientWorld) {

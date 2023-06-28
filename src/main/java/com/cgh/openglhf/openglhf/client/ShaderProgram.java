@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL33;
 
 import java.nio.FloatBuffer;
 
@@ -30,6 +31,19 @@ public class ShaderProgram {
         }
     }
 
+    public static String shaderTypeToString(int shaderType) {
+        return switch (shaderType) {
+            case GL_VERTEX_SHADER -> "VERTEX";
+            case GL_FRAGMENT_SHADER -> "FRAGMENT";
+            case GL_GEOMETRY_SHADER -> "GEOMETRY";
+            default -> "UNKNOWN";
+        };
+    }
+
+    public GLUniform createGLUniformIfExists(String name) {
+        return ShaderProgram.GLUniform.createIfExists(this.programId, name);
+    }
+
     public void createVertexShader(String shaderCode) throws Exception {
         vertexShaderId = createShader(shaderCode, GL_VERTEX_SHADER);
     }
@@ -45,14 +59,14 @@ public class ShaderProgram {
     protected int createShader(String shaderCode, int shaderType) throws Exception {
         int shaderId = glCreateShader(shaderType);
         if (shaderId == 0) {
-            throw new Exception("Error creating shader. Type: " + shaderType);
+            throw new Exception("Error creating shader. Type: " + shaderTypeToString(shaderType));
         }
 
         glShaderSource(shaderId, shaderCode);
         glCompileShader(shaderId);
 
         if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
-            throw new Exception("Error compiling Shader code: " + "(" + shaderType + ") " + glGetShaderInfoLog(shaderId, 1024));
+            throw new Exception("Error compiling Shader code: " + "(" + shaderTypeToString(shaderType) + ") " + glGetShaderInfoLog(shaderId, 1024));
         }
 
         glAttachShader(programId, shaderId);
@@ -124,6 +138,8 @@ public class ShaderProgram {
         private final int location;
         private final int programId;
 
+        private int savedProgramId;
+
         public static GLUniform createIfExists(int programId, String name) {
             var uniform = new GLUniform(programId, name);
             return uniform.location == -1 ? null : uniform;
@@ -134,6 +150,21 @@ public class ShaderProgram {
             this.location = GL20.glGetUniformLocation(programId, name);
         }
 
+        private void saveCurrentProgramAndSwitch() {
+            savedProgramId = GL20.glGetInteger(GL_CURRENT_PROGRAM);
+            GL20.glUseProgram(this.programId);
+        }
+
+        private void restoreProgram() {
+            GL20.glUseProgram(this.savedProgramId);
+        }
+
+        public void setUniform1f(float f) {
+            this.saveCurrentProgramAndSwitch();
+            GL20.glUniform1f(this.location, f);
+            this.restoreProgram();
+        }
+
         public void setUniformMatrix4fv(Matrix4f matrix) {
             FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
             matrix.get(buffer);
@@ -141,9 +172,21 @@ public class ShaderProgram {
         }
 
         public void setUniformMatrix4fv(FloatBuffer matrix) {
-            GL20.glUseProgram(programId);
+            this.saveCurrentProgramAndSwitch();
             GL20.glUniformMatrix4fv(location, false, matrix);
-            GL20.glUseProgram(0);
+            this.restoreProgram();
+        }
+
+        public void setVec2i(int v0, int v1) {
+            this.saveCurrentProgramAndSwitch();
+            GL33.glUniform2iv(location, new int[]{v0, v1});
+            this.restoreProgram();
+        }
+
+        public void setBool(boolean b) {
+            this.saveCurrentProgramAndSwitch();
+            GL33.glUniform1i(location, b ? 1 : 0);
+            this.restoreProgram();
         }
     }
 
